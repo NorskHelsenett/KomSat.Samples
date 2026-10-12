@@ -1,0 +1,18 @@
+﻿{
+  "resourceType": "Patient",
+  "identifier": [
+    {
+      "system": "urn:oid:2.16.578.1.12.4.1.4.1",
+      "value": "11845599620"
+    }
+  ],
+  "name": [
+    {
+      "use": "official",
+      "family": "DALSIDE",
+      "given": ["KRASS"]
+    }
+  ],
+  "gender": "female",
+  "birthDate": "1955-04-11"
+}
