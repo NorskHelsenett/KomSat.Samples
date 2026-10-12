@@ -19,7 +19,11 @@ public class AccessTokenKeeper
         _clientCredentialsFlow = clientCredentialsFlow;
     }
 
-
+    /// <summary>
+    ///     If an access token has been retrieved and cached, and is not close to expiry, then this token is returned.
+    ///     If not, null is returned.
+    /// </summary>
+    /// <returns></returns>
     public AccessTokenResponse? GetReusableToken()
     {
         if (_response is null)
@@ -42,6 +46,12 @@ public class AccessTokenKeeper
         return null;
     }
 
+    /// <summary>
+    ///     Retrieves access token from HelseID.
+    /// </summary>
+    /// <param name="parentOrgNumber"></param>
+    /// <returns></returns>
+    /// <exception cref="Exception"></exception>
     public async Task<AccessTokenResponse> GetNewToken(string parentOrgNumber)
     {
         /*
