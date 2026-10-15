@@ -1,3 +1,0 @@
-﻿# IKJ.Client
-
-TBD.
