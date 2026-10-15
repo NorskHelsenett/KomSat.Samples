@@ -22,18 +22,28 @@ public class InputFhirJsonReader
 
         foreach (var patient in patients)
         {
-            var name = patient.Name.First();
             var identifier = patient.Identifier.First();
-
-            Console.WriteLine(
-                "Found patient {0} {1}: {2}|{3}",
-                string.Join(" ", name.Given),
-                name.Family,
-                identifier.System,
-                identifier.Value);
+            Console.WriteLine("Found patient {0}: {1}", patient.GetName(), identifier.AsString());
         }
 
         return patients;
+    }
+
+    /// <summary>
+    ///     Reads JSON files in "EpisodesOfCare" folder and deserializes them into FHIR EpisodeOfCare resources.
+    /// </summary>
+    /// <returns></returns>
+    public IList<EpisodeOfCare> GetInputEpisodesOfCare()
+    {
+        var episodesOfCare = GetInputResources<EpisodeOfCare>("EpisodesOfCare");
+
+        foreach (var episodeOfCare in episodesOfCare)
+        {
+            var identifier = episodeOfCare.Identifier.First();
+            Console.WriteLine("Found episode of care {0}", identifier.AsString());
+        }
+
+        return episodesOfCare;
     }
 
     /// <summary>

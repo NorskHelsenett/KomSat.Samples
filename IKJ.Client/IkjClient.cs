@@ -10,8 +10,6 @@ namespace IKJ.Client;
 
 public class IkjClient
 {
-    private const string ParentOrgNumber = "315945062"; // NHN's synthetic organization number
-
     private readonly IDPoPProofCreatorForApiRequests _dPoPProofCreator;
     private readonly FhirJsonDeserializer _deserializer;
     private readonly IHttpClientFactory _httpClientFactory;
@@ -97,6 +95,6 @@ public class IkjClient
             return existingToken;
         }
 
-        return await _tokenKeeper.GetNewToken(ParentOrgNumber);
+        return await _tokenKeeper.GetNewToken(Configuration.ParentOrgNumber);
     }
 }
