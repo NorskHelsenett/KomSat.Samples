@@ -1,0 +1,39 @@
+﻿{
+  "resourceType": "EpisodeOfCare",
+  "identifier": [
+    {
+      "system": "https://komsat.samples.example.com/some-epj/service-id",
+      "value": "123-003"
+    }
+  ],
+  "status": "active",
+  "type": [
+    {
+      "coding": [
+        {
+          "system": "https://komsat.samples.example.com/ikj/kpr-codes",
+          "code": "27",
+          "display": "Elektronisk medisineringsstøtte"
+        },
+        {
+          "system": "https://komsat.samples.example.com/some-epj/service-codes",
+          "code": "2.7",
+          "display": "Medisindispenser MD-2000"
+        }
+      ]
+    }
+  ],
+  "patient": {
+    "reference": "Patient/001"
+  },
+  "managingOrganization": {
+    "identifier": {
+      "system": "https://komsat.samples.example.com/some-epj/area-codes",
+      "value": "1.1"
+    },
+    "display": "Andeby|Nord"
+  },
+  "period": {
+    "start": "2026-01-01T12:00:00.000000Z"
+  }
+}

@@ -1,0 +1,20 @@
+﻿{
+  "resourceType": "Patient",
+  "identifier": [
+    {
+      "system": "urn:oid:2.16.578.1.12.4.1.4.1",
+      "value": "05756402007"
+    }
+  ],
+  "name": [
+    {
+      "use": "official",
+      "family": "AGG",
+      "given": [
+        "VERTIKAL"
+      ]
+    }
+  ],
+  "gender": "female",
+  "birthDate": "1964-10-05"
+}
