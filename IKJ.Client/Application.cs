@@ -54,26 +54,25 @@ public class Application : IHostedService
         Console.WriteLine("{0}ADD INPUT EPISODES-OF-CARE{0}-----------------------------", Environment.NewLine);
 
         var inputEpisodesOfCare = _inputFhirJsonReader.GetInputEpisodesOfCare();
-        if (inputEpisodesOfCare.Count == 0)
+        if (inputEpisodesOfCare.Any())
+        {
+            foreach (var episodeOfCare in inputEpisodesOfCare)
+            {
+                await EnsureEpisodesOfCareExists(episodeOfCare, thePatient, cancellationToken);
+            }
+        }
+        else
         {
             Console.WriteLine("No input episodes of care found ...");
-            return;
-        }
-
-        var patientEpisodesOfCare = await GetEpisodesOfCareForPatientAsync(thePatient, CancellationToken.None);
-
-        foreach (var episodeOfCare in inputEpisodesOfCare)
-        {
-            await EnsureEpisodesOfCareExists(
-                episodeOfCare,
-                patientEpisodesOfCare,
-                thePatient,
-                cancellationToken);
         }
 
         /*
          * Misc EpisodeOfCare searches.
          */
+        Console.WriteLine("{0}EPISODES-OF-CARE FOR PATIENT{0}-------------------------------", Environment.NewLine);
+        await SearchForEpisodesOfCareForPatientAsync(thePatient, cancellationToken);
+
+
         Console.WriteLine(
             "{0}EPISODES-OF-CARE WITH KPR/IPLOS CODING{0}-----------------------------------------",
             Environment.NewLine);
@@ -175,15 +174,17 @@ public class Application : IHostedService
     }
 
     /// <summary>
-    ///     Searches for all EpisodeOfCare resources for a given patient.
+    ///     Searches for all EpisodeOfCare resources for a given patient. A limited number of pages are processed.
     /// </summary>
     /// <param name="patient"></param>
     /// <param name="ct"></param>
     /// <returns></returns>
-    private async Task<IList<EpisodeOfCare>> GetEpisodesOfCareForPatientAsync(Patient patient, CancellationToken ct)
+    private async Task SearchForEpisodesOfCareForPatientAsync(Patient patient, CancellationToken ct)
     {
-        List<EpisodeOfCare> returnedResources = [];
+        Console.WriteLine("Searching for episodes of care for patient {0}: id={1}", patient.GetName(), patient.Id);
+
         var pages = 0;
+        var itemNo = 0;
         string? nextPageCursor = null;
 
         do
@@ -192,49 +193,70 @@ public class Application : IHostedService
             var (episodesOfCare, cursor) =
                 await _ikjApi.GetEpisodesOfCareForPatientAsync(patient.Id!, nextPageCursor, ct);
 
-            returnedResources.AddRange(episodesOfCare);
+            Console.WriteLine("Retrieved {0} item(s) on page {1}:", episodesOfCare.Count, pages);
+
+            foreach (var episodeOfCare in episodesOfCare)
+            {
+                ++itemNo;
+                Console.WriteLine(
+                    "\tEoC {0}: systemCode={1}, patient={2}",
+                    itemNo,
+                    episodeOfCare.Type.Single().Coding.First().AsString(),
+                    episodeOfCare.Patient.Reference?.Split('/').Last());
+            }
+
             nextPageCursor = cursor;
-        } while (nextPageCursor != null);
+        } while (nextPageCursor != null && pages < Configuration.PageMaxCount);
 
-        Console.WriteLine(
-            "Retrieved {0} episodes of care for patient {1} by reading {2} page(s)",
-            returnedResources.Count,
-            patient.GetName(),
-            pages);
+        if (nextPageCursor != null)
+        {
+            Console.WriteLine("\t(Ignoring following pages)");
+        }
 
-        return returnedResources;
+        Console.WriteLine();
     }
 
     /// <summary>
     ///     Adds a new EpisodeOfCare using POST, as long as it doesn't exist already.
     /// </summary>
     /// <param name="episodeOfCare">EpisodeOfCare to be added</param>
-    /// <param name="existingEpisodesOfCare">Existing episodes of care</param>
     /// <param name="patient">Patient the EpisodeOfCare refers to</param>
     /// <param name="ct"></param>
     private async Task EnsureEpisodesOfCareExists(
         EpisodeOfCare episodeOfCare,
-        IList<EpisodeOfCare> existingEpisodesOfCare,
         Patient patient,
         CancellationToken ct)
     {
-        var identifier = episodeOfCare.Identifier.First();
-        var existingEpisodeOfCare = existingEpisodesOfCare.SingleOrDefault(e =>
-            e.Identifier.SingleOrDefault(i => i.System == identifier.System && i.Value == identifier.Value) != null);
+        var identifier = episodeOfCare.Identifier.FirstOrDefault();
 
-        if (existingEpisodeOfCare != null)
+        if (identifier is not null)
         {
-            Console.WriteLine(
-                "Skipping POST - EpisodeOfCare '{0}' already exists: id={1}",
-                identifier.AsString(),
-                existingEpisodeOfCare.Id);
-            return;
-        }
+            var system = identifier.System ?? string.Empty;
+            var value = identifier.Value ?? string.Empty;
+            var retrieved = await _ikjApi.GetResourceByIdentifierAsync<EpisodeOfCare>(system, value, ct);
 
-        Console.WriteLine(
-            "EpisodeOfCare '{0}' not found. Adding it to patient {1} now!",
-            identifier.AsString(),
-            patient.GetName());
+            if (retrieved is not null)
+            {
+                var retrievedPatientReference = retrieved.Patient.Reference!.Split('/').Last();
+
+                Console.WriteLine(
+                    "Skipping POST - EpisodeOfCare '{0}' already exists{1}: id={2}, patient={3}",
+                    identifier.AsString(),
+                    retrievedPatientReference != patient.Id
+                        ? " (for another patient)"
+                        : "",
+                    retrieved.Id,
+                    retrievedPatientReference);
+
+                episodeOfCare.Id = retrieved.Id;
+                return;
+            }
+
+            Console.WriteLine(
+                "EpisodeOfCare '{0}' not found. Adding it to patient {1} now!",
+                identifier.AsString(),
+                patient.GetName());
+        }
 
         episodeOfCare.Patient.Reference = $"Patient/{patient.Id}";
 
@@ -244,7 +266,7 @@ public class Application : IHostedService
 
         Console.WriteLine(
             "EpisodeOfCare '{0}' created successfully for patient {1}: id={2}",
-            identifier.AsString(),
+            identifier?.AsString() ?? "<no identifiers>",
             patient.GetName(),
             createdEpisodeOfCareId);
     }

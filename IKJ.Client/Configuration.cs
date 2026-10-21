@@ -5,7 +5,7 @@ public static class Configuration
     /// <summary>
     ///     URL to IKJ's test environment.
     /// </summary>
-    public const string ApiBaseUrl = "https://api.ikj.dev.nhn.no/v1";
+    public const string ApiBaseUrl = "https://api.ikj.test.nhn.no/v1";
 
     /// <summary>
     ///     Example code system for KPR (i.e. IPLOS) codes.
@@ -34,4 +34,9 @@ public static class Configuration
     ///     Number of resources returned per page
     /// </summary>
     public const int PageSize = 3;
+
+    /// <summary>
+    ///     Number of pages read
+    /// </summary>
+    public const int PageMaxCount = 3;
 }

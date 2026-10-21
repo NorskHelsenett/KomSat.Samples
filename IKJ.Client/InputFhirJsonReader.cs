@@ -39,8 +39,8 @@ public class InputFhirJsonReader
 
         foreach (var episodeOfCare in episodesOfCare)
         {
-            var identifier = episodeOfCare.Identifier.First();
-            Console.WriteLine("Found episode of care {0}", identifier.AsString());
+            var identifier = episodeOfCare.Identifier.FirstOrDefault();
+            Console.WriteLine("Found episode of care: {0}", identifier?.AsString() ?? "<no identifier>");
         }
 
         return episodesOfCare;
