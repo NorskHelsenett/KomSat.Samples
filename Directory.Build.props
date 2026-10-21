@@ -1,0 +1,15 @@
+<Project>
+  <PropertyGroup>
+    <Authors>Norsk Helsenett SF</Authors>
+    <Company>Norsk Helsenett SF</Company>
+    <Copyright>Copyright © Norsk Helsenett 2026</Copyright>
+    <RepositoryUrl>https://github.com/NorskHelsenett/KomSat.Samples</RepositoryUrl>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <TreatWarningsAsError>true</TreatWarningsAsError>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="../LICENSE" Pack="true" PackagePath="" />
+    <None Include="../README.md" Pack="true" PackagePath="" />
+  </ItemGroup>
+</Project>
